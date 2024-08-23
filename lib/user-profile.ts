@@ -27,7 +27,7 @@ export const currentUserProfile = async (redirect?: boolean) => {
     const newProfile = await db.user.create({
       data: {
         clerk_id: user.id,
-        name: `${user.firstName} ${user.lastName}`,
+        name: `${user.firstName ?? user.username ?? user.emailAddresses[0].emailAddress}`,
         imageUrl: user.imageUrl,
         email: user.emailAddresses[0].emailAddress,
       }
