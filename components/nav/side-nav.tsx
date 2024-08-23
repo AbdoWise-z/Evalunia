@@ -76,7 +76,7 @@ export function SideNav(
             {links.map((link, idx) => (
               <SidebarLink key={idx} link={link} className={cn(
                 "pl-2 rounded-full",
-                (pathname == link.href) && "dark:bg-neutral-600 bg-neutral-300",
+                (pathname == link.href) && "dark:bg-neutral-900 bg-neutral-300",
               )}/>
             ))}
           </div>
@@ -87,7 +87,7 @@ export function SideNav(
             {linksGroup2.map((link, idx) => (
               <SidebarLink key={idx} link={link} className={cn(
                 "pl-2 rounded-full",
-                (pathname == link.href) && "dark:bg-neutral-600 bg-neutral-300",
+                (pathname == link.href) && "dark:bg-neutral-900 bg-neutral-300",
               )}/>
             ))}
           </div>
@@ -108,6 +108,7 @@ export function SideNav(
           </SignedIn>
           <SignedOut>
             <SidebarLink
+              className={"pl-2"}
               link={{
                 label: "Login",
                 href: "/sign-in",
