@@ -105,9 +105,12 @@ export async function POST(req: Request, {
 
     const aiMessage = await db.message.create({
       data: {
-        content: aiRes,
+        content: aiRes.text,
         senderId: profile.id,
         role: "AI",
+        referencedProfs: aiRes.professors.map((i) => {
+          return i.id;
+        }),
       }
     })
 

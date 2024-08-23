@@ -26,6 +26,18 @@ model User {
   messages Message[]
 }
 
+model Professor {
+  id       String @id @default(uuid()) @map("_id")
+  name     String
+  email    String
+  imageUrl String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+}
+
 enum MessageRole {
   AI
   User
@@ -36,6 +48,8 @@ model Message {
 
   content String
   role    MessageRole
+
+  referencedProfs String[]
 
   senderId String
   sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)

@@ -8,4 +8,4 @@ const genAI = globalThis.genAI || new GoogleGenerativeAI(process.env.GEMINI_API_
 
 if (process.env.NODE_ENV != "production") globalThis.genAI = genAI;
 
-export const ai = genAI.getGenerativeModel({ model: 'gemini-pro' });
+export const ai = genAI.getGenerativeModel({ model: 'gemini-1.5-pro-latest' });
