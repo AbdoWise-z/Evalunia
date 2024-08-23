@@ -1,11 +1,11 @@
 "use client";
 
-import React, {useContext} from 'react';
-import {useChatQuery} from "@/hooks/use-chat";
+import React, { useContext } from 'react';
+import { useChatQuery } from "@/hooks/use-chat";
 import {InfiniteData, useQueryClient} from "@tanstack/react-query";
 import qs from "query-string";
 import axios from "axios";
-// import {Message} from "@prisma/client";
+import { Message } from "@prisma/client";
 
 type ChatContext = {
   state: string;
@@ -43,7 +43,7 @@ const ChatProvider = (
 
   const [isSendingMessage, setIsSendingMessage] = React.useState(false);
 
-  const addMessageToQuery = (m: /*Message*/ any) => {
+  const addMessageToQuery = (m: Message) => {
     mQueryClient.setQueryData(["chat"] , (oldData: any) => {
       if (!oldData || !oldData.pages || oldData.pages.length == 0) {
         return {
@@ -72,7 +72,7 @@ const ChatProvider = (
     });
   }
 
-  const updateLoadingMessage = (m: /*Message*/ any) => {
+  const updateLoadingMessage = (m: Message) => {
     mQueryClient.setQueryData(["chat"] , (oldData: any) => {
       if (!oldData || !oldData.pages || oldData.pages.length == 0) {
         return {

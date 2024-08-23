@@ -22,4 +22,24 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  messages Message[]
+}
+
+enum MessageRole {
+  AI
+  User
+}
+
+model Message {
+  id String @id @default(uuid()) @map("_id")
+
+  content String
+  role    MessageRole
+
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
