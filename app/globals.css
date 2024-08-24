@@ -58,7 +58,33 @@
     --chart-5: 340 75% 55%;
   }
 }
+@font-face {
+  font-family: 'Rafgins-Regular';
+  src: url('/fonts/Rafgins-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+@layer base {
+  :root {
+    --border: 0 0 0;
+    /* other color variables */
+  }
+}
+
+@layer components {
+  .border-border {
+    border-color: hsl(var(--border));
+  }
+  /* other custom classes */
+}
+
+.font-Rafgins {
+  font-family: 'Rafgins-Regular', sans-serif;
+}
 @layer base {
   * {
     @apply border-border;
