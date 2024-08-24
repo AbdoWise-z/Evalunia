@@ -3,6 +3,7 @@ import {cn} from "@/lib/utils";
 import {SideNav} from "@/components/nav/side-nav";
 import ModalProvider from "@/components/providers/modal-provider";
 import {currentUserProfile} from "@/lib/user-profile";
+import QueryProvider from "@/components/providers/query-provider";
 
 const MainLayout = async (
   { children } : {children: React.ReactNode}
@@ -17,9 +18,11 @@ const MainLayout = async (
     >
       <ModalProvider />
       <SideNav currentUser={user} />
-      <div className={"flex flex-1"}>
-        <div className="p-2 md:p-4 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full overflow-y-auto overflow-x-hidden">
-          {children}
+      <div className={"flex flex-1 overflow-y-auto overflow-x-hidden"}>
+        <div className="p-2 md:p-4 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full ">
+          <QueryProvider>
+            {children}
+          </QueryProvider>
         </div>
       </div>
     </div>

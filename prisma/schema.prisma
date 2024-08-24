@@ -22,4 +22,88 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  messages               Message[]
+  Reviews                Review[]
+  EmbeddingReviewVectors EmbeddingReviewVector[]
+}
+
+model Professor {
+  id String @id @default(uuid()) @map("_id")
+
+  name           String
+  email          String?
+  imageUrl       String?
+  address        String?
+  phone          String?
+  tags           String[]
+  school         String?
+  birthDate      DateTime?
+  qualifications String?
+  summary        String //a summary about the professor's personalliy, life, etc ..
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Reviews                Review[]
+  EmbeddingVectors       EmbeddingVector[]
+  EmbeddingReviewVectors EmbeddingReviewVector[]
+}
+
+model Review {
+  id String @id @default(uuid()) @map("_id")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  review String
+
+  prof        Professor @relation(fields: [professorId], references: [id])
+  professorId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  Rating Float
+}
+
+model EmbeddingVector {
+  id String @id @default(uuid()) @map("_id")
+
+  PineCodeId  String
+  prof        Professor @relation(fields: [professorId], references: [id])
+  professorId String
+}
+
+model EmbeddingReviewVector {
+  id String @id @default(uuid()) @map("_id")
+
+  PineCodeId String
+
+  prof        Professor @relation(fields: [professorId], references: [id])
+  professorId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+enum MessageRole {
+  AI
+  User
+}
+
+model Message {
+  id String @id @default(uuid()) @map("_id")
+
+  content   String
+  role      MessageRole
+  contentDB String?
+
+  referencedProfs String[]
+
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

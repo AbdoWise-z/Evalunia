@@ -38,7 +38,7 @@ export default function ExpandableCardDemo() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 h-full w-full z-10 "
+            className="fixed inset-0 bg-black/20 h-full w-full z-10"
           />
         )}
       </AnimatePresence>
@@ -60,7 +60,7 @@ export default function ExpandableCardDemo() {
                   duration: 0.05,
                 },
               }}
-              className="flex absolute top-2 right-2  lg:hidden items-center justify-center bg-white rounded-full h-6 w-6"
+              className="flex absolute top-2 right-2 lg:hidden items-center justify-center bg-white rounded-full h-6 w-6"
               onClick={() => setActive(null)}
             >
               <CloseIcon />
@@ -97,20 +97,11 @@ export default function ExpandableCardDemo() {
                       {active.description}
                     </motion.p>
                   </div>
-
-                  {/* <motion.a
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    href={active.ctaLink}
-                    target="_blank"
-                    className="px-4 py-3 text-sm rounded-full font-bold bg-green-500 text-white"
-                  >
-                    {active.ctaText}
-                  </motion.a> */}
                 </div>
                 <div className="pt-4 relative px-4 " >
+                  </motion.a>
+                </div>
+                <div className="pt-4 relative px-4">
                   <motion.div
                     layout
                     initial={{ opacity: 0 }}
@@ -261,8 +252,7 @@ const cards = [
           At the core of Evalunia's mission is a commitment to transparency 
           and objectivity. Our platform is designed to provide an unbiased 
           and comprehensive view of professor performance, empowering students 
-          to make informed choices without external influence.
-        </p>
+          to make informed choices without external influence.        </p>
       );
     },
   },
