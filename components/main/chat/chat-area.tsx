@@ -2,7 +2,7 @@
 
 import React, {createContext, Fragment, useContext, useEffect, useRef, useState} from 'react';
 import {Loader2, Send, ServerCrash} from "lucide-react";
-import {useChatContext} from "@/components/providers/chat-provider";
+import {MessageObject, useChatContext} from "@/components/providers/chat-provider";
 import {useChatScroll} from "@/hooks/use-chat-scroll";
 import {Message, MessageRole} from "@prisma/client";
 import LoadingAnimation from "@/components/main/chat/loading-animation";
@@ -98,7 +98,7 @@ const ChatArea = () => {
   }
 
   return (
-    <div className="flex flex-col h-full w-[60%] md:w-[50%] lg:w-[45%] mx-auto text-foreground">
+    <div className="flex flex-col h-full w-[100%] md:w-[80%] lg:w-[60%] xl:w-[50%] mx-auto text-foreground">
       <header className="flex justify-between items-center py-4 px-6 border-b">
         <h1 className="text-2xl font-bold">Chat AI</h1>
       </header>
@@ -127,13 +127,14 @@ const ChatArea = () => {
           <div className="flex flex-col-reverse">
             {chatContext.data?.pages?.map((page, pageIndex) => (
               <Fragment key={pageIndex}>
-                {page.items.map((item: Message, itemIdx : number) => (
+                {page.items.map((item: MessageObject, itemIdx : number) => (
                   <>
                     <ChatMessage
-                      key={item.id}
-                      content={item.content}
-                      sender={item.role == MessageRole.AI ? 'ai' : 'user'}
-                      animate={item.role == "AI" && pageIndex == 0 && itemIdx == 0}
+                      key={item.message.id}
+                      content={item.message.content}
+                      sender={item.message.role == MessageRole.AI ? 'ai' : 'user'}
+                      animate={item.message.role == "AI" && pageIndex == 0 && itemIdx == 0}
+                      attachments={item.attachments}
                     />
                     <div className={"h-3"}/>
                   </>
@@ -145,7 +146,7 @@ const ChatArea = () => {
         { (chatContext.isSendingMessage) && (
           <div className={"flex w-full group mt-2"}>
             <div className={cn(
-              "relative group flex w-fit rounded-t-xl max-w-[calc(95% - 24px)] bg-primary text-primary-foreground rounded-lg justify-center px-2 py-2",
+              "relative group flex w-fit rounded-t-xl max-w-[calc(95% - 24px)] bg-muted text-primary-foreground rounded-lg justify-center px-2 py-2",
             )}>
               <LoadingAnimation className={"w-8 h-8 mx-4"}/>
             </div>

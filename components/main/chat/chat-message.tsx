@@ -5,14 +5,18 @@ import remarkGfm from 'remark-gfm'
 import React, {useEffect, useState} from "react";
 import {useChatResize} from "@/components/main/chat/chat-area";
 import {delay} from "@/lib/utils";
+import {Professor} from "@prisma/client";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import Link from "next/link";
 
 type ChatMessageProps = {
   content: string
   sender: 'user' | 'ai',
-  animate?: boolean
+  animate?: boolean,
+  attachments: Professor[],
 }
 
-export function ChatMessage({ content, sender , animate }: ChatMessageProps) {
+export function ChatMessage({ content, sender , animate , attachments }: ChatMessageProps) {
   const [dispContent, setDispContent] = useState("");
   const [Copy , setCopy] = useState(false);
   const resize = useChatResize();
@@ -40,7 +44,7 @@ export function ChatMessage({ content, sender , animate }: ChatMessageProps) {
   }, []);
 
   return (
-    <div className={`flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex flex-col ${sender === 'user' ? 'items-end' : 'items-start'}`}>
       <div
         className={`max-w-[85%] p-3 rounded-lg ${
           sender === 'user'
@@ -69,6 +73,32 @@ export function ChatMessage({ content, sender , animate }: ChatMessageProps) {
           {animate ? dispContent : content}
         </ReactMarkdown>
       </div>
+
+      { attachments.length > 0 &&
+        <div className={"flex flex-wrap gap-2 pt-2 "}>
+          {attachments.map((prof, index) => (
+            <Link
+              key={index}
+              href={`/profile/${prof.id}`}
+              className={"border-2 border-transparent hover:border-muted transition-all rounded-lg"}
+              rel={'noopener noreferrer'}
+              prefetch={false}>
+              <div className="flex items-center space-x-4 bg-card text-card-foreground p-2 rounded-lg shadow-md dark:shadow-sm">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={prof.imageUrl || undefined} alt={prof.name}/>
+                  <AvatarFallback>{prof.name.split(' ').map(n => n[0]).join('').toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium leading-none">{prof.name}</p>
+                  <p
+                    className="text-sm text-muted-foreground">{prof.email ?? prof.phone ?? prof.address ?? "No Contact Info"}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      }
+
     </div>
   )
 }

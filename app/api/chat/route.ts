@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
 import {currentUserProfile} from "@/lib/user-profile";
-import { Message } from "@prisma/client";
+import {Message, Professor} from "@prisma/client";
 import {db} from "@/lib/db";
 import {getAIResponseTo} from "@/app/api/chat/helper-ai";
 
@@ -51,9 +51,40 @@ export async function GET(req: Request, {
       nextCursor = messages[patchSize - 1].id;
     }
 
+    let attachments: Professor[][] = [];
+    for (const message of messages) {
+      let profs: Professor[] = [];
+      for (const profId of message.referencedProfs){
+        const prof = await db.professor.findUnique({
+          where: {
+            id: profId,
+          },
+        })
+        if (!prof){
+          profs.push({
+            id: "deleted",
+            name: "Not found",
+            summary: "Seems like this professor was deleted from our database",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          } as Professor);
+          continue;
+        }
+
+        profs.push(prof);
+      }
+
+      attachments.push(profs);
+    }
+
     return NextResponse.json(
       {
-        items: messages,
+        items: messages.map((m , i) => {
+          return {
+            message: m,
+            attachments: attachments[i],
+          }
+        }),
         nextCursor: nextCursor,
       }
     );
@@ -78,13 +109,7 @@ export async function POST(req: Request, {
       return new NextResponse("Invalid Params" , {status: 402});
     }
 
-    const userMessage = await db.message.create({
-      data: {
-        content: content,
-        senderId: profile.id,
-        role: "User",
-      }
-    })
+
 
     // get the last 8 messages
     const messages = await db.message.findMany({
@@ -97,11 +122,28 @@ export async function POST(req: Request, {
       }
     })
 
+    const userMessage = await db.message.create({
+      data: {
+        content: content,
+        senderId: profile.id,
+        role: "User",
+      }
+    })
 
     const aiRes = await getAIResponseTo({
       history: messages,
-    }) ?? "AI generation failed, please try again";
+      currentMessage: content,
+    });
 
+
+    const finalUserMessage = await db.message.update({
+      where: {
+        id: userMessage.id,
+      },
+      data: {
+        contentDB: aiRes.contentDB,
+      }
+    })
 
     const aiMessage = await db.message.create({
       data: {
@@ -114,10 +156,32 @@ export async function POST(req: Request, {
       }
     })
 
+    let attachment: Professor[] = [];
+    for (const profId of aiMessage.referencedProfs){
+      const prof = await db.professor.findUnique({
+        where: {
+          id: profId,
+        },
+      })
+      if (!prof){
+        attachment.push({
+          id: "deleted",
+          name: "Not found",
+          summary: "Seems like this professor was deleted from our database",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } as Professor);
+        continue;
+      }
+
+      attachment.push(prof);
+    }
+
     return NextResponse.json(
       {
-        userMessage: userMessage,
+        userMessage: finalUserMessage,
         AiResponse: aiMessage,
+        attachment: attachment,
       }
     );
   } catch (error){

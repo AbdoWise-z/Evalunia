@@ -1,7 +1,7 @@
 import { Message } from "@prisma/client";
 import {ai} from "@/lib/gemini";
 import {Content} from "@google/generative-ai";
-import {generateEmbeddings, ProfReviewIndex} from "@/lib/pinecone";
+import {ProfessorWithReviewsWithUsers, queryPinecone, ReviewWithUser} from "@/lib/db-helper";
 
 const system_prompt_agent = `
 You are an AI assistant for a RateMyProfessor-like platform. Your role is to help students gain insights about professors based on review data. When queried about a professor:
@@ -13,6 +13,7 @@ You are an AI assistant for a RateMyProfessor-like platform. Your role is to hel
 5. If asked, provide specific quotes from reviews (without identifying reviewers).
 6. Maintain a neutral tone and present balanced information.
 7. If no data is available for a professor, clearly state this and suggest alternative ways to get information.
+8. If the user isn't asking about a professor, then you can answer like a normal person.
 
 Respond to queries concisely but informatively. Do not invent information if it's not in the review data. Prioritize helping students make informed decisions about their education.
 `
@@ -45,24 +46,38 @@ Examples:
 
 async function isAskingAboutAProf(
   {
-    history
+    history,
+    currentMessage,
   }: {
     history: Message[],
+    currentMessage: string
   }
 ): Promise<boolean> {
-  const formattedMessages = history.map((i) => {
-    return {
+
+  let formattedMessages: Content[] = [];
+
+  formattedMessages.push({
+    role: "user",
+    parts: [
+      {
+        text: (currentMessage),
+      }
+    ]
+  } as Content);
+
+  history.forEach((i , idx) => {
+    formattedMessages.push({
       role: i.role == 'AI' ? "model" : "user",
       parts: [
         {
-          text: i.content,
+          text: (i.content + (i.contentDB ?? "")),
         }
       ],
-    } as Content
-  }).reverse();
+    } as Content);
+  });
 
   const res = await ai.generateContent({
-    contents: formattedMessages,
+    contents: formattedMessages.reverse(),
     systemInstruction: system_prompt_director,
   });
 
@@ -71,82 +86,97 @@ async function isAskingAboutAProf(
   return text.includes("true");
 }
 
-export type ProfData = {
-  id: string;
-  name: string;
-  review: string;
-  score: string;
-}
-
 export type AiResponse = {
   text: string;
-  professors: ProfData[];
+  contentDB: string;
+  professors: ProfessorWithReviewsWithUsers[];
 }
 
 export const getAIResponseTo = async (
   {
-    history
+    history,
+    currentMessage,
   }: {
     history: Message[],
+    currentMessage: string
   }
 ): Promise<AiResponse> => {
 
   let PineconeData = '\n\nReturned results from DB (done automatically): \n';
-  let professors: ProfData[] = [];
+  let professors: ProfessorWithReviewsWithUsers[] = [];
   if ( (await isAskingAboutAProf({
-    history: history
+    history: history,
+    currentMessage: currentMessage,
   })) ){
-    const Embeddings = await generateEmbeddings(history[0].content);
-    console.log(Embeddings);
-
-    const res = await ProfReviewIndex.namespace('review-vectors').query({
-      topK: 3,
-      vector: Embeddings,
-      includeMetadata: true,
-      includeValues: false,
-    });
-
-    console.log(res.matches.length);
-
-    res.matches.forEach((i) => {
-      PineconeData += `
-      Name: ${i.metadata?.professor ?? "Undefined"}
-      stars: ${i.metadata?.stars ?? "Undefined"}
-      review: ${i.metadata?.review ?? "Undefined"}
-      
-      `;
-
-      professors.push({
-        id: `${i.id}`,
-        name: `${i.metadata?.professor ?? "Undefined"}`,
-        review: `${i.metadata?.review ?? "Undefined"}`,
-        score: `${i.metadata?.stars ?? "Undefined"}`,
+    const profs = await queryPinecone(currentMessage);
+    profs.forEach((i: ProfessorWithReviewsWithUsers) => {
+      let reviews = "";
+      let tags = "";
+      //fixme: this is a token burning machine ...
+      i.Reviews.forEach((i: ReviewWithUser) => {
+        reviews += `
+    Student Name: ${i.user.name}
+    Content: ${i.review}
+    Prof-Rating: ${i.Rating}
+        `;
       })
+
+      i.tags.forEach((i: string) => {
+        tags += ` ${i}`;
+      })
+
+      PineconeData += `
+  Name: ${i.name}
+  Address: ${i.address}
+  Email: ${i.email ?? "not set"}
+  BirthDate: ${i.birthDate?.toISOString() ?? "not set"}
+  Phone: ${i.phone ?? "not set"}
+  Qualifications: ${i.qualifications ?? "not set"}
+  Tags:${tags.length == 0 ? " none" : tags}
+  School: ${i.school ?? "not set"}
+  Summary: ${i.summary ?? "not set"}
+  Students Reviews: ${reviews.length == 0 ? "none" : reviews}
+  
+  `;
+
+      professors.push(i);
     })
   } else {
-    PineconeData += 'NONE';
+    PineconeData += 'User is not requesting info about a professor, Answer like a normal person.';
   }
 
   console.log(PineconeData);
 
-  const formattedMessages = history.map((i , idx) => {
-    return {
+  let formattedMessages: Content[] = [];
+
+  formattedMessages.push({
+    role: "user",
+    parts: [
+      {
+        text: (currentMessage + PineconeData),
+      }
+    ]
+  } as Content);
+
+  history.forEach((i , idx) => {
+    formattedMessages.push({
       role: i.role == 'AI' ? "model" : "user",
       parts: [
         {
-          text: idx == 0 ? (i.content + PineconeData) : i.content,
+          text: (i.content + (i.contentDB ?? "")),
         }
       ],
-    } as Content
-  }).reverse();
+    } as Content);
+  });
 
   const res = await ai.generateContent({
-    contents: formattedMessages,
+    contents: formattedMessages.reverse(),
     systemInstruction: system_prompt_agent,
   });
 
   return {
     text: res.response.text(),
     professors: professors,
+    contentDB: PineconeData,
   };
 }
