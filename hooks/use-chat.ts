@@ -1,6 +1,5 @@
 import qs from "query-string";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import {MessageObject} from "@/components/providers/chat-provider";
 
 
 interface ChatQueryProps {

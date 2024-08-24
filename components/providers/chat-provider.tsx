@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useContext } from 'react';
-import { useChatQuery } from "@/hooks/use-chat";
+import React, {useContext} from 'react';
+import {useChatQuery} from "@/hooks/use-chat";
 import {InfiniteData, useQueryClient} from "@tanstack/react-query";
 import qs from "query-string";
 import axios from "axios";
-import {Message, Professor} from "@prisma/client";
+// import {Message} from "@prisma/client";
 
 type ChatContext = {
   state: string;
@@ -29,10 +29,6 @@ const chatContext = React.createContext<ChatContext>({
   isFetchingNextPage: false,
 })
 
-export type MessageObject = {
-  message: Message,
-  attachments: Professor[],
-}
 
 const ChatProvider = (
   {
@@ -47,7 +43,7 @@ const ChatProvider = (
 
   const [isSendingMessage, setIsSendingMessage] = React.useState(false);
 
-  const addMessageToQuery = (m: MessageObject) => {
+  const addMessageToQuery = (m: /*Message*/ any) => {
     mQueryClient.setQueryData(["chat"] , (oldData: any) => {
       if (!oldData || !oldData.pages || oldData.pages.length == 0) {
         return {
@@ -76,7 +72,7 @@ const ChatProvider = (
     });
   }
 
-  const updateLoadingMessage = (m: MessageObject) => {
+  const updateLoadingMessage = (m: /*Message*/ any) => {
     mQueryClient.setQueryData(["chat"] , (oldData: any) => {
       if (!oldData || !oldData.pages || oldData.pages.length == 0) {
         return {
@@ -91,7 +87,7 @@ const ChatProvider = (
       const newData = [...oldData.pages];
 
       newData[0].items = newData[0].items.map((item: any) => {
-        if (item.message.id == "") return m;
+        if (item.id == "") return m;
         return item;
       })
 
@@ -129,17 +125,12 @@ const ChatProvider = (
   const _sendMessageInternal = async (message: string) => {
     try {
       addMessageToQuery({
-        message: {
-          role: "User",
-          content: message,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          id: "",
-          senderId: "",
-          referencedProfs: [],
-          contentDB: null
-        },
-        attachments: [],
+        role: "User",
+        content: message,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: "",
+        senderId: ""
       });
 
 
@@ -153,48 +144,28 @@ const ChatProvider = (
 
       const data = res.data;
 
-      updateLoadingMessage({
-        message: data.userMessage,
-        attachments: [],
-      });
-
-      addMessageToQuery({
-        message: data.AiResponse,
-        attachments: data.attachment,
-      });
+      updateLoadingMessage(data.userMessage);
+      addMessageToQuery(data.AiResponse);
 
       setIsSendingMessage(false);
       return true;
     } catch (error){
       console.log(error);
-
       updateLoadingMessage({
-        message: {
-          role: "User",
-          content: message,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          id: "invalid" + Math.random(),
-          senderId: "",
-
-          referencedProfs: [],
-          contentDB: null,
-        },
-        attachments: [],
+        role: "User",
+        content: message,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: "invalid" + Math.random(),
+        senderId: ""
       });
-
       addMessageToQuery({
-        message: {
-          role: "AI",
-          content: "Failed to send message",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          id: "invalid" + Math.random(),
-          senderId: "",
-          referencedProfs: [],
-          contentDB: null,
-        },
-        attachments: [],
+        role: "AI",
+        content: "Failed to send message",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: "invalid" + Math.random(),
+        senderId: ""
       });
       setIsSendingMessage(false);
       return false;

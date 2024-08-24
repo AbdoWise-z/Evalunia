@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 // import { LampContainer } from "@/components/ui/lamp";
@@ -43,15 +42,6 @@ const LandingPage = () => {
 
   
 
-  const handler = async () => {
-    try {
-      alert("sending request")
-      const res = await axios.get("/api/test");
-      alert(`done : ${res.data.id}`);
-    } catch (e) {
-      alert(e);
-    }
-  }
   return (
     <ThemeProvider>
     <div className="h-full flex flex-col mb-9">
