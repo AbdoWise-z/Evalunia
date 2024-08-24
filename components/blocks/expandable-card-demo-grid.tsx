@@ -38,7 +38,7 @@ export default function ExpandableCardDemo() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 h-full w-full z-10 "
+            className="fixed inset-0 bg-black/20 h-full w-full z-10"
           />
         )}
       </AnimatePresence>
@@ -60,7 +60,7 @@ export default function ExpandableCardDemo() {
                   duration: 0.05,
                 },
               }}
-              className="flex absolute top-2 right-2  lg:hidden items-center justify-center bg-white rounded-full h-6 w-6"
+              className="flex absolute top-2 right-2 lg:hidden items-center justify-center bg-white rounded-full h-6 w-6"
               onClick={() => setActive(null)}
             >
               <CloseIcon />
@@ -97,39 +97,29 @@ export default function ExpandableCardDemo() {
                       {active.description}
                     </motion.p>
                   </div>
-
-                  {/* <motion.a
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    href={active.ctaLink}
-                    target="_blank"
-                    className="px-4 py-3 text-sm rounded-full font-bold bg-green-500 text-white"
-                  >
-                    {active.ctaText}
-                  </motion.a> */}
                 </div>
                 <div className="pt-4 relative px-4 " >
-                  <motion.div
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-neutral-600 text-xs md:text-sm lg:text-base h-40 md:h-fit pb-10 flex flex-col items-start gap-4 overflow-auto dark:text-neutral-400 [mask:linear-gradient(to_bottom,white,white,transparent)] [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
-                  >
-                    {typeof active.content === "function"
-                      ? active.content()
-                      : active.content}
-                  </motion.div>
-                </div>
               </div>
-            </motion.div>
+              <div className="pt-4 relative px-4">
+                <motion.div
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-neutral-600 text-xs md:text-sm lg:text-base h-40 md:h-fit pb-10 flex flex-col items-start gap-4 overflow-auto dark:text-neutral-400 [mask:linear-gradient(to_bottom,white,white,transparent)] [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
+                >
+                  {typeof active.content === "function"
+                    ? active.content()
+                    : active.content}
+                </motion.div>
+              </div>
           </div>
-        ) : null}
+          </motion.div>
+          </div>
+          ) : null}
       </AnimatePresence>
       <ul className="max-w-2xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 items-start gap-4">
-        {cards.map((card, index) => (
+        {cards.map((card) => (
           <motion.div
             layoutId={`card-${card.title}-${id}`}
             key={card.title}
@@ -203,7 +193,7 @@ export const CloseIcon = () => {
 
 const cards = [
   {
-    // description: "Lana Del Rey",
+    description: "",
     title: "Instructor Feedback",
     src: "/images/feature1.jpg",
     // ctaText: "Visit",
@@ -211,13 +201,13 @@ const cards = [
     content: () => {
       return (
         <p>
-          Evalunia's platform not only benefits students but also supports the professional development of instructors. Professors can access their aggregated ratings and reviews, allowing them to identify areas of strength and opportunities for improvement in their teaching practices.
+          {"Evalunia's"} platform not only benefits students but also supports the professional development of instructors. Professors can access their aggregated ratings and reviews, allowing them to identify areas of strength and opportunities for improvement in their teaching practices.
         </p>
       );
     },
   },
   {
-    // description: "Babbu Maan",
+    description: "",
     title: "Insightful Reviews",
     src: "/images/feature2.jpg",
     // ctaText: "Visit",
@@ -232,7 +222,7 @@ const cards = [
   },
 
   {
-    // description: "Metallica",
+    description: "",
     title: "Detailed Professor Ratings",
     src: "/images/feature3.jpg",
     // ctaText: "Visit",
@@ -240,17 +230,17 @@ const cards = [
     content: () => {
       return (
         <p>
-          Students can rate professors based on a variety of factors, 
-          including teaching effectiveness, course difficulty, 
-          grading fairness, and overall satisfaction. 
-          These ratings are displayed in an easily digestible format, 
-          allowing users to quickly assess a professor's performance.
+          Students can rate professors based on a variety of factors,
+          including teaching effectiveness, course difficulty,
+          grading fairness, and overall satisfaction.
+          These ratings are displayed in an easily digestible format,
+          allowing users to quickly assess a {"professor's"} performance.
         </p>
       );
     },
   },
   {
-    // description: "Lord Himesh",
+    description: "",
     title: "Transparent and Unbiased",
     src: "/images/feature4.jpg",
     // ctaText: "Visit",
@@ -258,11 +248,10 @@ const cards = [
     content: () => {
       return (
         <p>
-          At the core of Evalunia's mission is a commitment to transparency 
-          and objectivity. Our platform is designed to provide an unbiased 
-          and comprehensive view of professor performance, empowering students 
-          to make informed choices without external influence.
-        </p>
+          At the core of {"Evalunia's"} mission is a commitment to transparency
+          and objectivity. Our platform is designed to provide an unbiased
+          and comprehensive view of professor performance, empowering students
+          to make informed choices without external influence.        </p>
       );
     },
   },
