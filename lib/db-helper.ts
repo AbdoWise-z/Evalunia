@@ -16,7 +16,6 @@ export type ProfessorWithReviewsWithUsers = Professor & {
   Reviews: ReviewWithUser[],
 }
 
-
 async function splitTextIntoChunks(data: string) {
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 64, chunkOverlap: 32,
