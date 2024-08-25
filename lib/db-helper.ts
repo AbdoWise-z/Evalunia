@@ -69,7 +69,22 @@ export async function addProfessorToDB(
 
   //step 2
   //generate embedding vectors
-  const summaryDocs = await splitTextIntoChunks(summary);
+  let tags_str = "";
+  tags.forEach((tag) => {
+    tags_str += `${tag} `;
+  })
+
+  const summaryDocs = await splitTextIntoChunks(
+    summary + "\n" +
+    "Name: " + name + "\n" +
+    "Email: " + (email ?? "") + "\n" +
+    "ImageUrl: " + (imageUrl ?? "") + "\n" +
+    "Address: " + (address ?? "") + "\n" +
+    "Tags: " + (tags_str ?? "") + "\n" +
+    "School: " + (school ?? "") + "\n" +
+    "Qualifications: " + (qualifications ?? "") + "\n" +
+    "Birth Date: " + (birthDate?.toDateString() ?? "") + "\n");
+
   const texts = summaryDocs.map((i) => i.pageContent);
   const embeddings = await Promise.all(texts.map( (i) => generateEmbeddings(i)));
   console.log("Generated: " + embeddings.length + " For " + name);

@@ -1,6 +1,6 @@
 import {Message} from "@prisma/client";
 import {ProfessorWithReviewsWithUsers, queryPinecone, ReviewWithUser} from "@/lib/db-helper";
-import {ai} from "@/lib/together";
+import {ai, getTextFromResponse, TogetherMessage} from "@/lib/together";
 
 
 const system_prompt_agent = `
@@ -35,10 +35,6 @@ Consider the entire conversation context, not just the most recent message. User
 Your response must be either "true" or "false" with no additional explanation or text.
 `
 
-export type TogetherMessage = {
-  role: "user" | "assistant" | "system";
-  content: string;
-}
 
 export async function isAskingAboutAProf(
   {
@@ -88,18 +84,6 @@ export async function isAskingAboutAProf(
   }
   return false;
 }
-
-const getTextFromResponse = (res: any) => {
-  if (res.choices && res.choices.length > 0) {
-    if (res.choices[0].message) {
-      return res.choices[0].message.content;
-    } else {
-      return null;
-    }
-  }
-  return null;
-}
-
 
 export type AiResponse = {
   text: string;
