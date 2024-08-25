@@ -98,7 +98,7 @@ const ChatArea = () => {
   }
 
   return (
-    <div className="flex flex-col h-full w-[100%] md:w-[80%] lg:w-[60%] xl:w-[50%] mx-auto text-foreground">
+    <div className="flex flex-col h-full w-[100vw] md:w-[65vw] lg:w-[60vw] xl:w-[50vw] mx-auto text-foreground">
       <header className="flex justify-between items-center py-4 px-6 border-b">
         <h1 className="text-2xl font-bold">Chat AI</h1>
       </header>
