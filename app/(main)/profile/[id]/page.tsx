@@ -1,46 +1,41 @@
 import { PrismaClient } from '@prisma/client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { HeartIcon } from 'lucide-react';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 
 
 const ProfilePage = async ({ params }: { params: { id: string } }) => {
   const prisma = new PrismaClient();
+  async function getProfessor(id: string) {
+    const professor = await prisma.professor.findUnique({
+      where: {
+        id: params.id,
+      },
+      include: {
+        Reviews: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
 
+    const avgRating =
+      (professor?.Reviews?.reduce((acc, review) => acc + review.Rating, 0) || 0) /
+      (professor?.Reviews?.length || 1);
 
-async function getProfessor(id: string) {
-  const professor = await prisma.professor.findUnique({
-    where: {
-      id: params.id,
-    },
-    include: {
-      Reviews: {
-        include: {
-          user: true,
-        }
-      }
-    }
-  });
+    const reviewsCount = professor?.Reviews?.length || 0;
 
+    return {
+      ...professor,
+      avgRating,
+      reviewsCount,
+      tags: professor?.tags || [],
+    };
+  }
 
-  
-  const avgRating =
-  (professor?.Reviews?.reduce((acc, review) => acc + review.Rating, 0) || 0) /
-  (professor?.Reviews?.length || 1);
-
-const reviewsCount = professor?.Reviews?.length || 0;
-
-
-  return {
-    ...professor,
-    avgRating,
-    reviewsCount,
-    tags: professor?.tags || [], 
-  };
-}
-
-  const professor =await getProfessor(params.id); 
+  const professor = await getProfessor(params.id);
 
   if (!professor) {
     return <p>Professor not found</p>;
@@ -61,14 +56,13 @@ const reviewsCount = professor?.Reviews?.length || 0;
           </div>
         </div>
         <div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="flex min-w-[44px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-muted text-foreground text-sm font-bold leading-normal tracking-[0.015em] "
-        >
-          <HeartIcon className="h-5 w-5" />
-          <span className="sr-only">Favorite</span>
-        </Button>
+          <Button
+            size="icon"
+            className="flex min-w-[44px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-muted text-foreground text-sm font-bold leading-normal tracking-[0.015em] "
+          >
+            <FavoriteBorderIcon className="h-5 w-5" />
+            <span className="sr-only">Favorite</span>
+          </Button>
         </div>
       </div>
 
