@@ -2,20 +2,19 @@
 import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "../ui/sidebar";
 import {
-  IconArrowLeft,
-  IconBrandTabler, IconLogin, IconMessageChatbot, IconPlus, IconSearch,
-  IconSettings,
-  IconUserBolt,
+  IconBrandTabler,
+  IconLogin,
+  IconMessageChatbot,
+  IconPlus,
+  IconSearch,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import Image from "next/image";
 import {User} from "@prisma/client";
+import { motion } from "framer-motion";
 import {SignedIn, SignedOut, UserButton} from "@clerk/nextjs";
 import {Separator} from "@/components/ui/separator";
 import {cn} from "@/lib/utils";
 import {ThemeToggle} from "@/components/ui/theme-toggle";
-import {useOrigin} from "@/hooks/use-origin";
 import {usePathname} from "next/navigation";
 
 export function SideNav(
