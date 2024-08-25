@@ -15,7 +15,9 @@ You are an AI assistant for a RateMyProfessor-like platform. Your role is to hel
 7. If no data is available for a professor, clearly state this and suggest alternative ways to get information.
 8. If the user isn't asking about a professor, then you can answer like a normal person.
 
-Respond to queries concisely but informatively. Do not invent information if it's not in the review data. Prioritize helping students make informed decisions about their education.
+Respond to queries concisely but informatively. 
+DO NOT invent information if it's not in the review data. 
+Prioritize helping students make informed decisions about their education.
 `
 
 const system_prompt_director = `
@@ -101,7 +103,7 @@ export const getAIResponseTo = async (
   }
 ): Promise<AiResponse> => {
 
-  let PineconeData = '\n\nReturned results from DB (done automatically): \n';
+  let PineconeData = '\n\nReview data returned from DB (done automatically): \n';
   let professors: ProfessorWithReviewsWithUsers[] = [];
   if ( (await isAskingAboutAProf({
     history: history,
@@ -135,9 +137,7 @@ export const getAIResponseTo = async (
   School: ${i.school ?? "not set"}
   Summary: ${i.summary ?? "not set"}
   Students Reviews: ${reviews.length == 0 ? "none" : reviews}
-  
   `;
-
       professors.push(i);
     })
   } else {
@@ -150,7 +150,7 @@ export const getAIResponseTo = async (
 
   formattedMessages.push({
     role: "user",
-    content: (currentMessage),
+    content: (currentMessage + PineconeData),
   } as TogetherMessage);
 
   history.forEach((i , idx) => {
