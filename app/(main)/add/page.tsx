@@ -6,16 +6,58 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 
+import * as z from 'zod';
+
+
+
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+
+
+const formSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  email: z.string().email().optional().or(z.literal('')),
+  imageUrl: z.string().url().optional().or(z.literal('')),
+  address: z.string().optional(),
+  phone: z.string().optional(),
+  tags: z.string().optional(),
+  school: z.string().optional(),
+  birthDate: z.string().optional(),
+  qualifications: z.string().optional(),
+  summary: z.string().min(1, { message: "Summary is required" }),
+});
+
 const Page = () => {
-  const [tags, setTags] = useState<string[]>([]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      imageUrl: '',
+      address: '',
+      phone: '',
+      tags: '',
+      school: '',
+      birthDate: '',
+      qualifications: '',
+      summary: '',
+    },
+  });
+
+  const handleSubmit = (values: z.infer<typeof formSchema>) => {
     console.log('Form submitted');
-  };
-
-  const handleTagsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTags(event.target.value.split(',').map(tag => tag.trim()));
+    const tags = values.tags?.split(',').map(tag => tag.trim());
   };
 
   return (
@@ -24,7 +66,7 @@ const Page = () => {
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center">Add the Professor</h1>
       </div>
 
-      <div className="flex flex-col gap-12 sm:gap-20 w-full sm:w-[90vw] md:w-[80vw] lg:w-[60vw] mx-auto p-4">
+      <div className="flex flex-col w-full sm:w-[90vw] md:w-[80vw] lg:w-[60vw] mx-auto p-4">
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex items-start flex-shrink-0">
             <div
@@ -32,34 +74,43 @@ const Page = () => {
               className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white text-lg sm:text-xl font-bold">
               1
             </div>
+
+            {/*TODO: add a separator*/}
+
           </div>
-          <div className='w-full shadow-custom-elevation rounded-2xl'>
-            <Card style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.01)',
-              border: 0,
-            }} className="flex-grow rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-xl sm:text-2xl">Add Professor via URL</CardTitle>
-                <CardDescription className="text-sm sm:text-base">Enter the URL of the professor's profile to automatically fill in the details.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form>
-                  <div className="space-y-2 mb-4">
-                    <Label htmlFor="url" className="text-sm sm:text-base">URL</Label>
-                    <Input id="url" type="url" />
-                    <p className="text-xs sm:text-sm text-muted-foreground">Enter the URL of the professor's profile</p>
-                  </div>
-                  <Button type="submit" className="w-full">Fetch</Button>
-                </form>
-              </CardContent>
-            </Card>
+          <div className="flex flex-col">
+            <div className='w-full shadow-custom-elevation rounded-2xl'>
+              <Card style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.01)',
+                border: 0,
+              }} className="flex-grow rounded-2xl">
+                <CardHeader>
+                  <CardTitle className="text-xl sm:text-2xl">Add Professor via URL</CardTitle>
+                  <CardDescription className="text-sm sm:text-base">Enter the URL of the {"professor's"} profile to
+                    automatically fill in the details.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form>
+                    <div className="space-y-2 mb-4">
+                      <Label htmlFor="url" className="text-sm sm:text-base">URL</Label>
+                      <Input id="url" type="url"/>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Enter the URL of
+                        the {"professor's"} profile</p>
+                    </div>
+                    <Button type="submit" className="w-full">Fetch</Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className={"h-12"}/>
           </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex items-start flex-shrink-0">
             <div
-              style={{ backgroundColor: 'rgba(31, 41, 55, 0.2)' }}
+              style={{backgroundColor: 'rgba(31, 41, 55, 0.2)'}}
               className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white text-lg sm:text-xl font-bold">
               2
             </div>
@@ -71,63 +122,158 @@ const Page = () => {
             }} className="flex-grow rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-xl sm:text-2xl">Professor Information</CardTitle>
-                <CardDescription className="text-sm sm:text-base">Enter the details for the professor. Fields marked with an asterisk (*) are required.</CardDescription>
+                <CardDescription className="text-sm sm:text-base">Enter the details for the professor. Fields marked
+                  with an asterisk (*) are required.</CardDescription>
               </CardHeader>
-              <form onSubmit={handleSubmit}>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm sm:text-base">Name *</Label>
-                    <Input id="name" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm sm:text-base">Email</Label>
-                    <Input id="email" type="email" />
-                    <p className="text-xs sm:text-sm text-muted-foreground">Optional</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="imageUrl" className="text-sm sm:text-base">Image URL</Label>
-                    <Input id="imageUrl" type="url" />
-                    <p className="text-xs sm:text-sm text-muted-foreground">Optional</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="address" className="text-sm sm:text-base">Address</Label>
-                    <Input id="address" />
-                    <p className="text-xs sm:text-sm text-muted-foreground">Optional</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-sm sm:text-base">Phone</Label>
-                    <Input id="phone" type="tel" />
-                    <p className="text-xs sm:text-sm text-muted-foreground">Optional</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="tags" className="text-sm sm:text-base">Tags (comma-separated)</Label>
-                    <Input id="tags" onChange={handleTagsChange} />
-                    <p className="text-xs sm:text-sm text-muted-foreground">Optional</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="school" className="text-sm sm:text-base">School</Label>
-                    <Input id="school" />
-                    <p className="text-xs sm:text-sm text-muted-foreground">Optional</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="birthDate" className="text-sm sm:text-base">Birth Date</Label>
-                    <Input id="birthDate" type="date" />
-                    <p className="text-xs sm:text-sm text-muted-foreground">Optional</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="qualifications" className="text-sm sm:text-base">Qualifications</Label>
-                    <Input id="qualifications" />
-                    <p className="text-xs sm:text-sm text-muted-foreground">Optional</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="summary" className="text-sm sm:text-base">Summary *</Label>
-                    <Textarea id="summary" required placeholder="A summary about the professor's personality, life, etc..." />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full">Submit</Button>
-                </CardFooter>
-              </form>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleSubmit)}>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">Name *</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" {...field} />
+                          </FormControl>
+                          <FormDescription className="text-xs sm:text-sm text-muted-foreground">Optional</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="imageUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">Image URL</FormLabel>
+                          <FormControl>
+                            <Input type="url" {...field} />
+                          </FormControl>
+                          <FormDescription className="text-xs sm:text-sm text-muted-foreground">Optional</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="address"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">Address</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormDescription className="text-xs sm:text-sm text-muted-foreground">Optional</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">Phone</FormLabel>
+                          <FormControl>
+                            <Input type="tel" {...field} />
+                          </FormControl>
+                          <FormDescription className="text-xs sm:text-sm text-muted-foreground">Optional</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="tags"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">Tags (comma-separated)</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormDescription className="text-xs sm:text-sm text-muted-foreground">Optional</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="school"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">School</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormDescription className="text-xs sm:text-sm text-muted-foreground">Optional</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="birthDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">Birth Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormDescription className="text-xs sm:text-sm text-muted-foreground">Optional</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="qualifications"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">Qualifications</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormDescription className="text-xs sm:text-sm text-muted-foreground">Optional</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="summary"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">Summary *</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} placeholder="A summary about the professor's personality, life, etc..." />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                  <CardFooter>
+                    <div className={"ml-auto"}>
+                      <Button type="submit" className="w-full">Submit</Button>
+                    </div>
+                  </CardFooter>
+                </form>
+              </Form>
             </Card>
           </div>
         </div>
