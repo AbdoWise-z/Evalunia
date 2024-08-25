@@ -5,13 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import axios from 'axios'; // Import axios in JS
-
-
-
+import axios from 'axios';
 import * as z from 'zod';
-
-
 
 import {
   Form,
@@ -41,16 +36,13 @@ const formSchema = z.object({
 });
 
 const Page = () => {
-  const [tags, setTags] = useState<string[]>([]);
   const [url, setURL] = useState<string>('');
-
 
   const handleUrlSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const urlAsString = url.toString();
     console.log('URL:', urlAsString);
 
-    // Reset the URL state to clear the input field
     setTimeout(() => {
       setURL('');
     }, 1000);
