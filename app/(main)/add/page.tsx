@@ -5,6 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import axios from 'axios'; // Import axios in JS
+
+
 
 import * as z from 'zod';
 
@@ -38,6 +41,57 @@ const formSchema = z.object({
 });
 
 const Page = () => {
+  const [tags, setTags] = useState<string[]>([]);
+  const [url, setURL] = useState<string>('');
+
+
+  const handleUrlSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const urlAsString = url.toString();
+    console.log('URL:', urlAsString);
+
+    // Reset the URL state to clear the input field
+    setTimeout(() => {
+      setURL('');
+    }, 1000);
+
+    async function scrapeHTML(URL: string) {
+      try {
+        // Replace this URL with your actual Cloudflare Worker URL
+        const workerURL = 'https://html-scraper.zekee981.workers.dev/';
+
+        const response = await fetch(workerURL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url: URL }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const htmlContent = await response.text();
+        return htmlContent;
+      } catch (error) {
+        console.error('Error scraping HTML:', error);
+        return null;
+      }
+    }
+
+    try {
+      const htmlContent = await scrapeHTML(urlAsString);
+      if (htmlContent) {
+        console.log(htmlContent);
+      } else {
+        console.log('Failed to scrape HTML.');
+      }
+    } catch (error) {
+      console.error('Error scraping HTML:', error);
+    }
+  };
+
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -78,35 +132,33 @@ const Page = () => {
             {/*TODO: add a separator*/}
 
           </div>
-          <div className="flex flex-col">
-            <div className='w-full shadow-custom-elevation rounded-2xl'>
-              <Card style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.01)',
-                border: 0,
-              }} className="flex-grow rounded-2xl">
-                <CardHeader>
-                  <CardTitle className="text-xl sm:text-2xl">Add Professor via URL</CardTitle>
-                  <CardDescription className="text-sm sm:text-base">Enter the URL of the {"professor's"} profile to
-                    automatically fill in the details.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form>
-                    <div className="space-y-2 mb-4">
-                      <Label htmlFor="url" className="text-sm sm:text-base">URL</Label>
-                      <Input id="url" type="url"/>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Enter the URL of
-                        the {"professor's"} profile</p>
-                    </div>
+          <div className='w-full shadow-custom-elevation rounded-2xl'>
+            <Card style={{ backgroundColor: 'rgba(255, 255, 255, 0.01)', border: 0 }} className="flex-grow rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-xl sm:text-2xl">Add Professor via URL</CardTitle>
+                <CardDescription className="text-sm sm:text-base">Enter the URL of the professor's profile to automatically fill in the details.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleUrlSubmit}>
+                  <div className="space-y-2 mb-4">
+                    <Label htmlFor="url" className="text-sm sm:text-base">URL</Label>
+                    <Input name="url"
+                      type="url"
+                      placeholder="Enter professor's profile URL"
+                      value={url}
+                      onChange={(e) => setURL(e.target.value)}
+                      required />
+                    <p className="text-xs sm:text-sm text-muted-foreground ">The URL of the professor's profile</p>
                     <Button type="submit" className="w-full">Fetch</Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </div>
+                  </div>
 
-            <div className={"h-12"}/>
+                </form>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
+        {/* Rest of the form fields */}
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex items-start flex-shrink-0">
             <div
