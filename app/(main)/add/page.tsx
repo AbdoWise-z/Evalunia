@@ -132,29 +132,35 @@ const Page = () => {
             {/*TODO: add a separator*/}
 
           </div>
-          <div className='w-full shadow-custom-elevation rounded-2xl'>
-            <Card style={{ backgroundColor: 'rgba(255, 255, 255, 0.01)', border: 0 }} className="flex-grow rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-xl sm:text-2xl">Add Professor via URL</CardTitle>
-                <CardDescription className="text-sm sm:text-base">Enter the URL of the professor's profile to automatically fill in the details.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleUrlSubmit}>
-                  <div className="space-y-2 mb-4">
-                    <Label htmlFor="url" className="text-sm sm:text-base">URL</Label>
-                    <Input name="url"
-                      type="url"
-                      placeholder="Enter professor's profile URL"
-                      value={url}
-                      onChange={(e) => setURL(e.target.value)}
-                      required />
-                    <p className="text-xs sm:text-sm text-muted-foreground ">The URL of the professor's profile</p>
-                    <Button type="submit" className="w-full">Fetch</Button>
-                  </div>
+          <div className={"flex flex-col"}>
+            <div className='w-full shadow-custom-elevation rounded-2xl'>
+              <Card style={{backgroundColor: 'rgba(255, 255, 255, 0.01)', border: 0}} className="flex-grow rounded-2xl">
+                <CardHeader>
+                  <CardTitle className="text-xl sm:text-2xl">Add Professor via URL</CardTitle>
+                  <CardDescription className="text-sm sm:text-base">Enter the URL of the {"professor's"} profile to
+                    automatically fill in the details.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleUrlSubmit}>
+                    <div className="space-y-2 mb-4">
+                      <Label htmlFor="url" className="text-sm sm:text-base">URL</Label>
+                      <Input name="url"
+                             type="url"
+                             placeholder="Enter professor's profile URL"
+                             value={url}
+                             onChange={(e) => setURL(e.target.value)}
+                             required/>
+                      <p className="text-xs sm:text-sm text-muted-foreground ">The URL of
+                        the {"professor's"} profile</p>
+                      <Button type="submit" className="w-full">Fetch</Button>
+                    </div>
 
-                </form>
-              </CardContent>
-            </Card>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className={"h-12"}/>
           </div>
         </div>
 
