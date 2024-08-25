@@ -1,7 +1,7 @@
-import { Message } from "@prisma/client";
-import {ai} from "@/lib/gemini";
-import {Content} from "@google/generative-ai";
+import {Message} from "@prisma/client";
 import {ProfessorWithReviewsWithUsers, queryPinecone, ReviewWithUser} from "@/lib/db-helper";
+import {ai} from "@/lib/together";
+
 
 const system_prompt_agent = `
 You are an AI assistant for a RateMyProfessor-like platform. Your role is to help students gain insights about professors based on review data. When queried about a professor:
@@ -19,32 +19,28 @@ Respond to queries concisely but informatively. Do not invent information if it'
 `
 
 const system_prompt_director = `
-You are an AI agent that determines if a user is seeking information about a professor or teacher. Your task:
+You are an academic query classifier. Your sole function is to determine whether a user's input is seeking information about professors, classes, academic materials, or educational institutions. You must output ONLY "true" or "false" based on your analysis.
 
-1. Analyze the input query and surrounding context carefully.
-2. Determine if the query is both:
-   a) About a professor or teacher (including general terms like educator, instructor, etc.)
-   b) Seeking information or details about them
+Respond "true" if the query relates to any of the following:
+1. Professor information (e.g., names, specialties, qualifications)
+2. Class information (e.g., course names, schedules, content)
+3. Academic materials (e.g., textbooks, research papers)
+4. Educational institutions (e.g., schools, colleges, universities)
+5. General academic inquiries (e.g., fields of study, degree programs)
 
-3. Output ONLY "true" if both conditions are met:
-   - The query is about a professor/teacher
-   - The user is asking for information about them
+Respond "false" for any query not related to these academic topics.
 
-4. Output ONLY "false" for all other cases, including:
-   - Queries not about educators
-   - Statements about educators that don't seek information
-   - General academic questions not specific to educators
+Consider the entire conversation context, not just the most recent message. Users may be following up on or clarifying previous academic-related questions.
 
-Respond with nothing but "true" or "false". Consider context from previous messages if available.
-
-Examples:
-"Who is the best professor?" -> true
-"Is Dr. Smith teaching next semester?" -> true
-"I hate my math teacher" -> false (statement, not seeking info)
-"What's the weather like?" -> false
+Your response must be either "true" or "false" with no additional explanation or text.
 `
 
-async function isAskingAboutAProf(
+export type TogetherMessage = {
+  role: "user" | "assistant" | "system";
+  content: string;
+}
+
+export async function isAskingAboutAProf(
   {
     history,
     currentMessage,
@@ -54,37 +50,56 @@ async function isAskingAboutAProf(
   }
 ): Promise<boolean> {
 
-  let formattedMessages: Content[] = [];
+  let formattedMessages: TogetherMessage[] = [];
 
   formattedMessages.push({
     role: "user",
-    parts: [
-      {
-        text: (currentMessage),
-      }
-    ]
-  } as Content);
+    content: (currentMessage),
+  } as TogetherMessage);
+
+  formattedMessages.push({
+    role: "system",
+    content: system_prompt_director,
+  })
 
   history.forEach((i , idx) => {
     formattedMessages.push({
-      role: i.role == 'AI' ? "model" : "user",
-      parts: [
-        {
-          text: (i.content + (i.contentDB ?? "")),
-        }
-      ],
-    } as Content);
+      role: i.role == 'AI' ? "assistant" : "user",
+      content: (i.content + (i.contentDB ?? "")),
+    } as TogetherMessage);
   });
 
-  const res = await ai.generateContent({
-    contents: formattedMessages.reverse(),
-    systemInstruction: system_prompt_director,
+  const res = await ai.chat.completions.create({
+    messages: formattedMessages.reverse(),
+    model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+    max_tokens: 512,
+    temperature: 0.7,
+    top_p: 0.7,
+    top_k: 50,
+    repetition_penalty: 1,
+    stop: ["<|eot_id|>","<|eom_id|>"],
+    stream: false
   });
 
-  const text = res.response.text();
-  console.log(text.includes("true"));
-  return text.includes("true");
+  const text = getTextFromResponse(res);
+  console.log(`Director Text: ${text}`);
+  if (text) {
+    return text.includes("true");
+  }
+  return false;
 }
+
+const getTextFromResponse = (res: any) => {
+  if (res.choices && res.choices.length > 0) {
+    if (res.choices[0].message) {
+      return res.choices[0].message.content;
+    } else {
+      return null;
+    }
+  }
+  return null;
+}
+
 
 export type AiResponse = {
   text: string;
@@ -147,35 +162,44 @@ export const getAIResponseTo = async (
 
   console.log(PineconeData);
 
-  let formattedMessages: Content[] = [];
+  let formattedMessages: TogetherMessage[] = [];
 
   formattedMessages.push({
     role: "user",
-    parts: [
-      {
-        text: (currentMessage + PineconeData),
-      }
-    ]
-  } as Content);
+    content: (currentMessage),
+  } as TogetherMessage);
 
   history.forEach((i , idx) => {
     formattedMessages.push({
-      role: i.role == 'AI' ? "model" : "user",
-      parts: [
-        {
-          text: (i.content + (i.contentDB ?? "")),
-        }
-      ],
-    } as Content);
+      role: i.role == 'AI' ? "assistant" : "user",
+      content: (i.content + (i.contentDB ?? "")),
+    } as TogetherMessage);
   });
 
-  const res = await ai.generateContent({
-    contents: formattedMessages.reverse(),
-    systemInstruction: system_prompt_agent,
+  formattedMessages.push({
+    role: "system",
+    content: system_prompt_agent,
+  })
+
+  const res = await ai.chat.completions.create({
+    messages: formattedMessages.reverse(),
+    model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+    max_tokens: 512,
+    temperature: 0.7,
+    top_p: 0.7,
+    top_k: 50,
+    repetition_penalty: 1,
+    stop: ["<|eot_id|>","<|eom_id|>"],
+    stream: false
   });
+
+  const text = getTextFromResponse(res);
+  if (!text) {
+    throw "Failed to generate AI content";
+  }
 
   return {
-    text: res.response.text(),
+    text: text,
     professors: professors,
     contentDB: PineconeData,
   };

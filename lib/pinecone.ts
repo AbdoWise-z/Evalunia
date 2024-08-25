@@ -31,3 +31,8 @@ export const generateEmbeddings = async (text: string) : Promise<any> => {
 
   return await response.json();
 }
+
+
+export const generateEmbeddings2 = async (text: string) : Promise<any> => {
+
+}
