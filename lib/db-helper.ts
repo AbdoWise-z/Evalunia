@@ -16,7 +16,6 @@ export type ProfessorWithReviewsWithUsers = Professor & {
   Reviews: ReviewWithUser[],
 }
 
-
 async function splitTextIntoChunks(data: string) {
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 64, chunkOverlap: 32,
@@ -70,7 +69,22 @@ export async function addProfessorToDB(
 
   //step 2
   //generate embedding vectors
-  const summaryDocs = await splitTextIntoChunks(summary);
+  let tags_str = "";
+  tags.forEach((tag) => {
+    tags_str += `${tag} `;
+  })
+
+  const summaryDocs = await splitTextIntoChunks(
+    summary + "\n" +
+    "Name: " + name + "\n" +
+    "Email: " + (email ?? "") + "\n" +
+    "ImageUrl: " + (imageUrl ?? "") + "\n" +
+    "Address: " + (address ?? "") + "\n" +
+    "Tags: " + (tags_str ?? "") + "\n" +
+    "School: " + (school ?? "") + "\n" +
+    "Qualifications: " + (qualifications ?? "") + "\n" +
+    "Birth Date: " + (birthDate?.toDateString() ?? "") + "\n");
+
   const texts = summaryDocs.map((i) => i.pageContent);
   const embeddings = await Promise.all(texts.map( (i) => generateEmbeddings(i)));
   console.log("Generated: " + embeddings.length + " For " + name);
@@ -141,7 +155,7 @@ async function setProfessorSummaryEmbeddings(
   )));
 }
 
-export async function queryPinecone(text: string , topK: number = 3) : Promise<ProfessorWithReviewsWithUsers[]> {
+export async function queryPinecone(text: string , topK: number = 10 , maxOut: number = 3 , threshold: number = 0.01) : Promise<ProfessorWithReviewsWithUsers[]> {
   const Embeddings = await generateEmbeddings(text);
   console.log(`queryPinecone: ${Embeddings.length}`);
 
@@ -155,8 +169,13 @@ export async function queryPinecone(text: string , topK: number = 3) : Promise<P
   let out: ProfessorWithReviewsWithUsers[] = [];
   let mSet = new Set<string>();
   res.matches.forEach((i) => {
+
     const profID = i.metadata?.id;
     console.log(`ProfID: ${profID}`);
+    if (!i.score || i.score < threshold || mSet.size >= maxOut) {
+      console.log("skipped due to low score: " + i.score);
+      return;
+    }
     if (profID) {
       mSet.add(profID as string);
       console.log(`Added: ${mSet.size}`);

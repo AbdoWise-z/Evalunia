@@ -2,7 +2,7 @@ import {NextResponse} from "next/server";
 import {currentUserProfile} from "@/lib/user-profile";
 import {Message, Professor} from "@prisma/client";
 import {db} from "@/lib/db";
-import {getAIResponseTo} from "@/app/api/chat/helper-ai";
+import {getAIResponseTo} from "@/app/api/chat/llama-helper";
 
 const DefaultPatchSize = 20;
 const MaxPatchSize = 40;

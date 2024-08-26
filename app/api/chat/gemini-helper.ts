@@ -44,7 +44,7 @@ Examples:
 "What's the weather like?" -> false
 `
 
-async function isAskingAboutAProf(
+export async function isAskingAboutAProf(
   {
     history,
     currentMessage,

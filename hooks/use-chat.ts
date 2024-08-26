@@ -1,7 +1,5 @@
 import qs from "query-string";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import {MessageObject} from "@/components/providers/chat-provider";
-
 
 interface ChatQueryProps {
   queryKey: string;
@@ -30,6 +28,11 @@ export const useChatQuery = (
     queryFn: fetchMessages,
     getNextPageParam: lastPage => lastPage?.nextCursor,
     refetchInterval: false,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    staleTime: 9999999999,
   })
 
   const data = iq.data;
