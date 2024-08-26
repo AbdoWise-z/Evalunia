@@ -43,6 +43,26 @@ export async function POST(req: Request, {
           Rating: rating,
         },
       })
+
+      await db.$transaction(async (tx) => {
+        const prof = await tx.professor.findUnique({
+          where: {
+            id: prof_id,
+          }
+        });
+        if (!prof) { return }
+
+        await tx.professor.update({
+          where: {
+            id: prof_id,
+          },
+          data: {
+            totalStars: prof.totalStars + (rating - oldReview.Rating),
+            rating: (prof.totalStars + (rating - oldReview.Rating)) / Math.max(prof.totalReviews, 1)
+          }
+        })
+      })
+
     } else {
       await db.review.create({
         data: {
@@ -52,6 +72,26 @@ export async function POST(req: Request, {
           userId: profile.id,
         },
       });
+
+      await db.$transaction(async (tx) => {
+        const prof = await tx.professor.findUnique({
+          where: {
+            id: prof_id,
+          }
+        });
+        if (!prof) { return }
+
+        await tx.professor.update({
+          where: {
+            id: prof_id,
+          },
+          data: {
+            totalStars: prof.totalStars + rating,
+            totalReviews: prof.totalReviews + 1,
+            rating: (prof.totalStars + rating) / (prof.totalReviews + 1)
+          }
+        })
+      })
     }
 
     return NextResponse.json({

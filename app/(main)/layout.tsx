@@ -18,8 +18,8 @@ const MainLayout = async (
     >
       <ModalProvider />
       <SideNav currentUser={user} />
-      <div className={"flex flex-1 overflow-y-auto overflow-x-hidden"}>
-        <div className="rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full ">
+      <div className={"flex flex-1 overflow-hidden"}>
+        <div className="rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1 overflow-y-auto">
           <QueryProvider>
             {children}
           </QueryProvider>

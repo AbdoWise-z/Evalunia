@@ -23,6 +23,29 @@ const ProfilePage = async ({ params }: { params: { id: string } }) => {
       },
     }) as ProfessorWithReviewsWithUsers;
 
+    if (!professor) {
+      return null;
+    }
+
+    await db.$transaction(async (tx) => {
+      const prof = await tx.professor.findUnique({
+        where: {
+          id: params.id,
+        }
+      });
+
+      if (!prof) return;
+
+      await tx.professor.update({
+        where: {
+          id: params.id,
+        },
+        data: {
+          viewed: prof.viewed + 1,
+        }
+      })
+    })
+
     const avgRating =
       (professor?.Reviews?.reduce((acc, review) => acc + review.Rating, 0) || 0) /
       (professor?.Reviews?.length || 1);
@@ -31,7 +54,6 @@ const ProfilePage = async ({ params }: { params: { id: string } }) => {
     professor?.Reviews?.forEach(review => {
       stars[Math.round(Math.max(Math.min(4 , review.Rating - 1) , 0))]++;
     })
-
 
     const reviewsCount = professor?.Reviews?.length || 0;
 

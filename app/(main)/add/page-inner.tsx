@@ -168,7 +168,7 @@ const AddPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex-1 flex flex-col items-center gap-8 sm:gap-10 p-4 sm:p-5 overflow-x-hidden">
+    <div className="flex-1 flex flex-col items-center gap-8 sm:gap-10 p-4 sm:p-5 overflow-x-hidden">
 
       <div className="flex flex-col w-full sm:w-[90vw] md:w-[80vw] lg:w-[60vw] mx-auto p-4">
         <div className="flex flex-col md:flex-row gap-6">

@@ -48,6 +48,15 @@ model Professor {
   Reviews                Review[]
   EmbeddingVectors       EmbeddingVector[]
   EmbeddingReviewVectors EmbeddingReviewVector[]
+
+  //analytics
+  searched     Int   @default(0)
+  viewed       Int   @default(0)
+  totalStars   Float @default(0)
+  totalReviews Int   @default(0)
+  rating       Float @default(0)
+
+  @@index([id, searched, viewed, totalStars, totalReviews, rating])
 }
 
 model Review {
