@@ -182,6 +182,28 @@ const LandingPage = () => {
 
         </div>
       </div>
+      
+
+      {/* Footer */}
+      <footer className="bg-white dark:bg-neutral-950 dark:text-neutral-300 py-8 mt-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center">
+            <div className="mb-4 sm:mb-0">
+              <p>&copy; 2024 Evalunia. All rights reserved.</p>
+            </div>
+            <ul className="flex space-x-4">
+              <li><a href="#" className="hover:text-neutral-600 dark:hover:text-neutral-100">Privacy Policy</a></li>
+              <li><a href="#" className="hover:text-neutral-600 dark:hover:text-neutral-100">Terms of Service</a></li>
+              <li><a href="#" className="hover:text-neutral-600 dark:hover:text-neutral-100">Contact Us</a></li>
+            </ul>
+          </div>
+        </div>
+        <h2
+          className="text-9xl py-20 my-10 md:text-10xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-400 to-neutral-950 dark:from-neutral-50 dark:to-neutral-400 bg-opacity-50 font-Rafgins">
+          ~ Evalunia ~
+        </h2>
+
+      </footer>
 
 
     </div>
