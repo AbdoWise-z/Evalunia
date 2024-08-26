@@ -155,7 +155,7 @@ async function setProfessorSummaryEmbeddings(
   )));
 }
 
-export async function queryPinecone(text: string , topK: number = 3) : Promise<ProfessorWithReviewsWithUsers[]> {
+export async function queryPinecone(text: string , topK: number = 10 , maxOut: number = 3 , threshold: number = 0.01) : Promise<ProfessorWithReviewsWithUsers[]> {
   const Embeddings = await generateEmbeddings(text);
   console.log(`queryPinecone: ${Embeddings.length}`);
 
@@ -169,8 +169,13 @@ export async function queryPinecone(text: string , topK: number = 3) : Promise<P
   let out: ProfessorWithReviewsWithUsers[] = [];
   let mSet = new Set<string>();
   res.matches.forEach((i) => {
+
     const profID = i.metadata?.id;
     console.log(`ProfID: ${profID}`);
+    if (!i.score || i.score < threshold || mSet.size >= maxOut) {
+      console.log("skipped due to low score: " + i.score);
+      return;
+    }
     if (profID) {
       mSet.add(profID as string);
       console.log(`Added: ${mSet.size}`);

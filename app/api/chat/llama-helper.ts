@@ -21,24 +21,49 @@ Prioritize helping students make informed decisions about their education.
 `
 
 const system_prompt_director = `
-You are an academic query classifier. Your sole function is to determine whether a user's input is seeking information about professors, classes, academic materials, or educational institutions. You must output ONLY "true" or "false" based on your analysis.
+You are an AI assistant designed to analyze user queries and determine if they are seeking information about persons, academic institutions, or classes. Your task is to:
 
-Respond "true" if the query relates to any of the following:
-1. Professor information (e.g., names, specialties, qualifications)
-2. Class information (e.g., course names, schedules, content)
-3. Academic materials (e.g., textbooks, research papers)
-4. Educational institutions (e.g., schools, colleges, universities)
-5. General academic inquiries (e.g., fields of study, degree programs)
+1. Carefully examine the user's input and consider any context from previous messages.
+2. Determine if the query is related to finding information about:
+   a) Specific persons or people in general
+   b) Academic institutions
+   c) Classes or courses
+3. If the query matches these criteria, provide a concise summary of what the user is trying to find.
+4. If the query does not match these criteria, output only the word "false".
 
-Respond "false" for any query not related to these academic topics.
+Rules:
+- Focus on queries about people (specific or general), academic institutions, and classes/courses.
+- Consider the current context of the conversation when generating the summary.
+- Provide a brief, clear summary starting with "trying to find information about".
+- Do not answer the user's query or provide any actual information.
+- If the query doesn't relate to people, academic institutions, or classes, output only "false".
 
-Consider the entire conversation context, not just the most recent message. Users may be following up on or clarifying previous academic-related questions.
+Examples:
+User: "Is there any physics professor in Cairo University?"
+Output: trying to find information about physics professors at Cairo University
 
-Your response must be either "true" or "false" with no additional explanation or text.
+User: "What's the weather like today?"
+Output: false
+
+User: "Hello"
+Output: false
+
+User: "Who was the first female dean of Harvard Law School?"
+Output: trying to find information about the first female dean of Harvard Law School
+
+User: "Can you list all the departments in Oxford University?"
+Output: trying to find information about departments in Oxford University
+
+User: "Are there any online machine learning courses available?"
+Output: trying to find information about online machine learning courses
+
+User: "What prerequisites are needed for the advanced calculus class?"
+Output: trying to find information about prerequisites for the advanced calculus class
+
+Always analyze the query carefully and provide the appropriate output based on these guidelines.
 `
 
-
-export async function isAskingAboutAProf(
+export async function directorCall(
   {
     history,
     currentMessage,
@@ -46,7 +71,7 @@ export async function isAskingAboutAProf(
     history: Message[],
     currentMessage: string
   }
-): Promise<boolean> {
+): Promise<string | null> {
 
   let formattedMessages: TogetherMessage[] = [];
 
@@ -79,12 +104,14 @@ export async function isAskingAboutAProf(
     stream: false
   });
 
-  const text = getTextFromResponse(res);
+  const text = getTextFromResponse(res) as string;
   console.log(`Director Text: ${text}`);
   if (text) {
-    return text.includes("true");
+    if (text.includes("false")) {
+      return null;
+    }
   }
-  return false;
+  return text;
 }
 
 export type AiResponse = {
@@ -105,11 +132,14 @@ export const getAIResponseTo = async (
 
   let PineconeData = '\n\nReview data returned from DB (done automatically): \n';
   let professors: ProfessorWithReviewsWithUsers[] = [];
-  if ( (await isAskingAboutAProf({
+
+  const summary = await directorCall({
     history: history,
     currentMessage: currentMessage,
-  })) ){
-    const profs = await queryPinecone(currentMessage);
+  });
+
+    if ( summary ){
+    const profs = await queryPinecone(summary);
     profs.forEach((i: ProfessorWithReviewsWithUsers) => {
       let reviews = "";
       let tags = "";
