@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from 'react'
+import {useEffect, useState, useTransition} from 'react'
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import {Star, Search, Eye, EyeIcon} from "lucide-react"
+import {Star, Search, Eye, EyeIcon, Loader2} from "lucide-react"
 import Link from "next/link";
 import {Button} from "@/components/ui/button";
 import queryString from 'query-string';
@@ -30,6 +30,8 @@ export default function SearchHighlights(
   const [searchTerm, setSearchTerm] = useState("")
   const router = useRouter();
 
+  const [isPending, startTransition] = useTransition();
+
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value
     setSearchTerm(term)
@@ -42,8 +44,12 @@ export default function SearchHighlights(
         q: searchTerm,
       }
     })
+
+    console.log("submit: " + url)
     router.push(url);
-    router.refresh();
+    startTransition(() => {
+      router.refresh();
+    });
   }
 
   const handleKeyDown = (event: any) => {
@@ -67,11 +73,13 @@ export default function SearchHighlights(
                 onChange={handleSearch}
                 onSubmit={handleSubmit}
                 onKeyDown={handleKeyDown}
+                disabled={isPending}
                 className="pr-12 pl-4 py-2 flex-1 bg-primary-foreground text-primary border-2 border-primary-foreground focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:border-transparent"
               />
 
-              <Button size={"icon"} className={"absolute right-0 top-0"} onClick={() => {handleSubmit()}}>
-                <Search className={"w-8 h-8"}/>
+              <Button size={"icon"} className={"absolute right-0 top-0"} disabled={isPending} onClick={() => {handleSubmit()}}>
+                {!isPending && <Search className={"w-8 h-8"}/>}
+                {isPending && <Loader2 className={"w-8 h-8 animate-spin"}/>}
               </Button>
 
             </div>
