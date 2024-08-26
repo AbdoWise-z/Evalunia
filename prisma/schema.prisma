@@ -65,6 +65,8 @@ model Review {
   userId String
 
   Rating Float
+
+  @@unique([professorId, userId]) //each user can only have one review for each prof
 }
 
 model EmbeddingVector {
@@ -107,4 +109,3 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
