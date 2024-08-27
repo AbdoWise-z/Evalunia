@@ -26,6 +26,7 @@ model User {
   messages               Message[]
   Reviews                Review[]
   EmbeddingReviewVectors EmbeddingReviewVector[]
+  Professors             Professor[]
 }
 
 model Professor {
@@ -55,6 +56,10 @@ model Professor {
   totalStars   Float @default(0)
   totalReviews Int   @default(0)
   rating       Float @default(0)
+
+  //owner
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
 
   @@index([id, searched, viewed, totalStars, totalReviews, rating])
 }

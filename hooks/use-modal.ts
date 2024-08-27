@@ -4,7 +4,7 @@ export enum ModalType {
   ADD_ITEM,
   EDIT_ITEM,
   DELETE_ITEMS,
-  //TODO: add other types
+  //TODO: prof other types
 }
 
 

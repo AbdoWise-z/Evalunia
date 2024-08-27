@@ -36,6 +36,7 @@ export async function addProfessorToDB(
     birthDate,
     qualifications,
     summary,
+    userId,
   } : {
     name: string;
     email?: string;
@@ -47,11 +48,12 @@ export async function addProfessorToDB(
     birthDate?: Date;
     qualifications?: string;
     summary: string;
+    userId: string;
   }
 ) {
 
   //step 1
-  //add them to the db
+  //prof them to the db
   const prof = await db.professor.create({
     data: {
       name,
@@ -64,6 +66,7 @@ export async function addProfessorToDB(
       birthDate,
       qualifications,
       summary,
+      userId,
     }
   });
 
@@ -96,15 +99,18 @@ export async function addProfessorToDB(
   return prof.id;
 }
 
-async function updateProfessorSummaryEmbeddings(
-  {
-    id,
-    embeddings
-  } : {
-    id: string;
-    embeddings: any[]
-  }
-) {
+export async function removeProfessorSummaryEmbeddings(
+  {id , userId} : {id : string , userId: string}
+) : Promise<number> {
+  const prof = await db.professor.findUnique({
+    where: {
+      id: id,
+    }
+  })
+
+  if (!prof) return 404;
+  if (prof.userId != userId) return 401;
+
   const pineconeNS = ProfReviewIndex;
   //search for old embeddings
   const old = await db.embeddingVector.findMany({
@@ -122,9 +128,10 @@ async function updateProfessorSummaryEmbeddings(
     }
   })));
 
+  return 200;
 }
 
-async function setProfessorSummaryEmbeddings(
+export async function setProfessorSummaryEmbeddings(
   {
     id,
     embeddings

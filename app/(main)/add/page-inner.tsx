@@ -130,7 +130,7 @@ const AddPage = () => {
     console.log('Form submitted');
     const tags = values.tags?.split(',').map(tag => tag.trim());
     try {
-      const res = await axios.post("/api/add" , {
+      const res = await axios.post("/api/prof" , {
         ...values,
         tags: tags,
       });
@@ -157,7 +157,7 @@ const AddPage = () => {
         })
       }
     } catch (e) {
-      toast("Failed to add professor", {
+      toast("Failed to prof professor", {
         description: "Seems like an internet error has happened",
         action: {
           label: "OK",

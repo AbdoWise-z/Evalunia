@@ -7,7 +7,7 @@ const isPublicRoute = createRouteMatcher([
   "/search(.*)" , // search page
   "/profile(.*)", // search result page
   "/dashboard(.*)", // dashboard page
-  "/add(.*)", // prof adding page
+  "/prof(.*)", // prof adding page
   "/chat(.*)", // ai chat page
 ]);
 
